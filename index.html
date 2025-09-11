@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>MYG App - HTML</title>
+  <style>
+    /* Basic styling */
+    :root { font-family: Arial, sans-serif; color: #222; }
+    body { margin: 0; padding: 0; display:flex; min-height:100vh; align-items:center; justify-content:center; background:#f5f7fb; }
+    .card { background: #fff; padding: 22px; border-radius: 12px; box-shadow: 0 6px 18px rgba(20,20,50,0.06); width: 360px; }
+    h1 { margin: 0 0 12px 0; font-size: 20px; }
+    label { display:block; margin-top:10px; font-size:13px; }
+    input { width:100%; padding:10px; margin-top:6px; border:1px solid #e2e6ef; border-radius:8px; }
+    button { margin-top:14px; width:100%; padding:10px; border-radius:8px; border:none; background:#3b82f6; color:#fff; font-weight:600; cursor:pointer; }
+    .link { margin-top:10px; text-align:center; font-size:13px; }
+    .link a { color:#3b82f6; text-decoration:none; }
+    .small { font-size:13px; color:#666; }
+    .actions { display:flex; gap:8px; margin-top:12px; }
+    .secondary { background:#efefef; color:#222; }
+    .hidden { display:none; }
+    .user-info { font-size:14px; margin-top:6px; }
+    .center { text-align:center; }
+  </style>
+</head>
+<body>
+
+  <div class="card" id="app">
+
+    <!-- Login screen -->
+    <div id="login-screen" class="screen">
+      <h1>Login</h1>
+      <div id="login-error" class="small" style="color:crimson"></div>
+      <label>Email
+        <input id="login-email" type="email" placeholder="you@example.com" />
+      </label>
+      <label>Password
+        <input id="login-password" type="password" placeholder="password" />
+      </label>
+      <button id="btn-login">Sign in</button>
+      <div class="link">
+        Don't have an account? <a href="#/register">Register</a>
+      </div>
+      <div class="link small">
+        Or login as admin: <a href="#/admin-home">Admin Home (demo)</a>
+      </div>
+    </div>
+
+    <!-- Register screen -->
+    <div id="register-screen" class="screen hidden">
+      <h1>Register</h1>
+      <div id="register-error" class="small" style="color:crimson"></div>
+      <label>Full name
+        <input id="register-name" type="text" placeholder="Your name" />
+      </label>
+      <label>Email
+        <input id="register-email" type="email" placeholder="you@example.com" />
+      </label>
+      <label>Password
+        <input id="register-password" type="password" placeholder="password" />
+      </label>
+      <button id="btn-register">Create account</button>
+      <div class="link">
+        Already registered? <a href="#/login">Sign in</a>
+      </div>
+    </div>
+
+    <!-- User home -->
+    <div id="user-home-screen" class="screen hidden">
+      <h1>User Home</h1>
+      <div class="user-info" id="user-info">Loading...</div>
+
+      <div class="actions">
+        <button id="btn-signout" class="secondary">Sign out</button>
+        <button id="btn-go-admin">Admin view</button>
+      </div>
+    </div>
+
+    <!-- Admin home -->
+    <div id="admin-home-screen" class="screen hidden">
+      <h1>Admin Home</h1>
+      <div id="admin-info" class="small">Welcome, Admin</div>
+      <div style="margin-top:12px">
+        <button id="btn-admin-signout">Sign out</button>
+        <button id="btn-back-home" class="secondary">Back to user home</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Firebase SDKs (compat for simpler example) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
+  <script>
+    // ========== Firebase initialization ==========
+    const firebaseConfig = {
+      apiKey: "AIzaSyCMpL3qAuICifV5AtglGVo4__74QAZrljA",
+      projectId: "fluttermain1-e9cab",
+      messagingSenderId: "2552076201",
+      storageBucket: "fluttermain1-e9cab.firebasestorage.app",
+      appId: "1:2552076201:android:2a3471c5370adce06d96b8",
+      databaseURL: "https://fluttermain1-e9cab-default-rtdb.europe-west1.firebasedatabase.app/"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
+
+    // Change this to the admin email you want to treat as admin.
+    const ADMIN_EMAIL = "admin@example.com";
+
+    // ========== Simple router ==========
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+      const el = document.getElementById(screenId);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function route() {
+      const hash = location.hash || '#/login';
+      if (hash.startsWith('#/login')) return showScreen('login-screen');
+      if (hash.startsWith('#/register')) return showScreen('register-screen');
+      if (hash.startsWith('#/home')) return showScreen('user-home-screen');
+      if (hash.startsWith('#/admin-home')) return showScreen('admin-home-screen');
+      // default
+      showScreen('login-screen');
+    }
+    window.addEventListener('hashchange', route);
+
+    // ========== UI helpers ==========
+    function showError(elId, text) {
+      const el = document.getElementById(elId);
+      el.textContent = text || '';
+    }
+
+    // ========== Auth logic ==========
+    // On auth state change: redirect to appropriate screen
+    auth.onAuthStateChanged(async (user) => {
+      if (user) {
+        // user is signed in
+        // A trivial admin check by email (for demo). Replace with proper claims in production.
+        if (user.email && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase()) {
+          location.hash = '/admin-home';
+          document.getElementById('admin-info').textContent = `Welcome, Admin (${user.email})`;
+        } else {
+          location.hash = '/home';
+          document.getElementById('user-info').textContent = `Hello ${user.displayName || ''} (${user.email})`;
+        }
+      } else {
+        // no user signed in
+        location.hash = '/login';
+      }
+    });
+
+    // Register
+    document.getElementById('btn-register').addEventListener('click', async () => {
+      showError('register-error', '');
+      const name = document.getElementById('register-name').value.trim();
+      const email = document.getElementById('register-email').value.trim();
+      const pass = document.getElementById('register-password').value;
+      if (!email || !pass) { showError('register-error', 'Email and password required'); return; }
+      try {
+        const res = await auth.createUserWithEmailAndPassword(email, pass);
+        // Save displayName
+        await res.user.updateProfile({ displayName: name || null });
+        // Optionally save more info to realtime db
+        await db.ref('users/' + res.user.uid).set({ name: name || '', email });
+        // Signed in automatically; onAuthStateChanged will redirect.
+      } catch (err) {
+        showError('register-error', err.message || String(err));
+      }
+    });
+
+    // Login
+    document.getElementById('btn-login').addEventListener('click', async () => {
+      showError('login-error', '');
+      const email = document.getElementById('login-email').value.trim();
+      const pass = document.getElementById('login-password').value;
+      if (!email || !pass) { showError('login-error', 'Email and password required'); return; }
+      try {
+        await auth.signInWithEmailAndPassword(email, pass);
+        // onAuthStateChanged redirect handles navigation
+      } catch (err) {
+        showError('login-error', err.message || String(err));
+      }
+    });
+
+    // Sign out buttons
+    document.getElementById('btn-signout').addEventListener('click', () => auth.signOut());
+    document.getElementById('btn-admin-signout').addEventListener('click', () => auth.signOut());
+
+    // Buttons for navigation / demo
+    document.getElementById('btn-go-admin').addEventListener('click', () => {
+      // Attempt to navigate to admin view; actual admin view only loads if current user email matches ADMIN_EMAIL
+      location.hash = '/admin-home';
+    });
+    document.getElementById('btn-back-home').addEventListener('click', () => location.hash = '/home');
+
+    // Start the router once
+    route();
+  </script>
+</body>
+</html>
