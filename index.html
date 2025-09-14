@@ -29,6 +29,7 @@ header h1 { margin:0; }
 .nav { display:flex; justify-content:space-around; background:#f1f1f1; padding:0.5rem 0; position:fixed; width:100%; bottom:0; box-shadow:0 -2px 5px rgba(0,0,0,0.1); }
 .nav button { background:none; color:#1976d2; border:none; font-weight:bold; cursor:pointer; }
 #search { width:100%; padding:8px; margin:10px 0; border-radius:6px; border:1px solid #ccc; }
+input { display:block; width:100%; margin-bottom:10px; padding:6px; border-radius:5px; border:1px solid #ccc; }
 </style>
 </head>
 <body>
@@ -54,21 +55,38 @@ let orders = [];
 let products = [
   {id:1,name:'Laptop',category:'Electronics',price:1200,stock:10,image:'https://sp.yimg.com/ib/th?id=OPAC.f0oA28OUsywifw474C474&o=5&pid=21.1&w=160&h=105'},
   {id:2,name:'Kettle',category:'Kitchen Appliances',price:225,stock:5,image:'https://lzd-img-global.slatic.net/g/p/d3f3f215d0f24fc1270c9e07eb8b1330.jpg_720x720q80.jpg_.webp'},
-  {id:3,name:'Hair Straighteners',category:'Personal Care',price:35,stock:5,image:'https://www.myg.in/images/thumbnails/500/500/detailed/92/image-removebg-preview_-_2024-11-01T120432.270.png.png'},
+   {id:3,name:'Hair Straighteners',category:'Personal Care',price:35,stock:5,image:'https://www.myg.in/images/thumbnails/500/500/detailed/92/image-removebg-preview_-_2024-11-01T120432.270.png.png'},
   {id:4,name:'Headphones',category:'Electronics',price:199,stock:8,image:'https://tse2.mm.bing.net/th/id/OIP.vh2FSVY3fjEgpvsPtVhPbwHaHa?pid=Api&P=0&h=180'},
   {id:5,name:'Printers',category:'Electronics',price:120,stock:12,image:'https://myg.in/chp/01/mob/onam-page-mob_16.jpg'},
   {id:7,name:'Air Fryer',category:'Kitchen Appliances',price:15,stock:20,image:'https://myg.in/chp/01/mob/onam-page-mob_28.jpg'},
   {id:8,name:'Watch',category:'Accessories',price:250,stock:4,image:'https://www.myg.in/images/thumbnails/500/500/detailed/118/fa1-removebg-preview.png.png'},
-  {id:9,name:'Dish Washer',category:'Kitchen Appliances',price:250,stock:4,image:'https://myg.in/chp/01/mob/onam-page-mob_29.jpg'}
-];
+  {id:9,name:'Dish Washer',category:'Kitchen Appliances',price:250,stock:4,image:'https://myg.in/chp/01/mob/onam-page-mob_29.jpg'},
+{id:10,name:'Smartphone',category:'Electronics',price:699,stock:15,image:'https://tse4.mm.bing.net/th/id/OIP.uq51xRRlTwx0dyY3iBHtFgHaEK?pid=Api&P=0&h=180'},
+  {id:11,name:'Blender',category:'Kitchen Appliances',price:99,stock:10,image:'https://tse3.mm.bing.net/th/id/OIP.IdR3puTnsvMYXsydxFsPPQHaHa?pid=Api&P=0&h=180'},
+  {id:12,name:'Electric Toothbrush',category:'Personal Care',price:49,stock:25,image:'https://sp.yimg.com/ib/th?id=OPAC.Eti4%2fEom%2fRgOlQ474C474&o=5&pid=21.1&w=160&h=105'},
+  {id:13,name:'Wireless Mouse',category:'Electronics',price:29,stock:30,image:'https://sp.yimg.com/ib/th?id=OPAC.fn1g6ZX1Tye%2bFA474C474&o=5&pid=21.1&w=160&h=105'},
+  {id:14,name:'Coffee Maker',category:'Kitchen Appliances',price:120,stock:12,image:'https://tse3.mm.bing.net/th/id/OIP.KAY01DGX_97Z-8rIxOua8QHaHa?pid=Api&P=0&h=180'},
+  {id:15,name:'Hair Dryer',category:'Personal Care',price:55,stock:20,image:'https://tse2.mm.bing.net/th/id/OIP.yp4oCLKBUmbJaeL5F6hdkQHaHa?pid=Api&P=0&h=180'},
+ {id:16,name:'Fitness Tracker',category:'Accessories',price:149,stock:18,image:'https://tse2.mm.bing.net/th/id/OIP.vOYfRAXCvv5lXx3gZSLDMQHaEK?pid=Api&P=0&h=180'},
+  {id:17,name:'Microwave Oven',category:'Kitchen Appliances',price:200,stock:7,image:'https://tse2.mm.bing.net/th/id/OIP.WOq4Lbn_Qx6d88xxdIigpAHaFe?pid=Api&P=0&h=180'},
+  {id:18,name:'Laptop del',category:'Accessories',price:45,stock:25,image:'https://tse2.mm.bing.net/th?id=OIF.SWne%2fk%2bNeOCOKTgOnza53Q&pid=Api&P=0&h=180'},
+  {id:19,name:'Gaming Headset',category:'Electronics',price:89,stock:15,image:'https://tse1.mm.bing.net/th/id/OIP.lUWnN0xmXvItmaKkATKBuwHaHa?pid=Api&P=0&h=180'},
+  {id:20,name:'Juicer',category:'Kitchen Appliances',price:130,stock:10,image:'https://www.myg.in/images/detailed/52/Black_2_c8cdcb94-6ff9-4fda-89df-5a9b79b30739_900x.jpeg'},
+  {id:21,name:'Shaver',category:'Personal Care',price:65,stock:12,image:'https://sp.yimg.com/ib/th?id=OPAC.Kfz%2bCGLyVRu80A474C474&o=5&pid=21.1&w=160&h=105'},
+{id:22,name:'Smartwatch',category:'Accessories',price:199,stock:10,image:'https://tse3.mm.bing.net/th/id/OIP.DbN7IS5jAbI5SRbCZwtrEQHaHa?pid=Api&P=0&h=180'},
+  {id:23,name:'Tablet',category:'Electronics',price:350,stock:8,image:'https://tse4.mm.bing.net/th/id/OIP.6YawlZx76VXThgcOxk0aKwAAAA?pid=Api&P=0&h=180'},
+  {id:24,name:'Rice Cooker',category:'Kitchen Appliances',price:80,stock:20,image:'https://tse3.mm.bing.net/th/id/OIP.tEgxkkHaAWkQYXl1g-EOegHaHR?pid=Api&P=0&h=180'},
+  {id:25,name:'induction cookers',category:'Accessories',price:75,stock:30,image:'https://sp.yimg.com/ib/th?id=OPAC.85%2b3Pgviz4xlGw474C474&o=5&pid=21.1&w=160&h=105'},
+  {id:26,name:'Hair Straightener',category:'Personal Care',price:40,stock:18,image:'https://sp.yimg.com/ib/th?id=OPAC.E9MiMKJZaf310w474C474&o=5&pid=21.1&w=160&h=105'},
+ {id:27,name:'Camera',category:'Electronics',price:499,stock:6,image:'https://picsum.photos/200/150?random=27'},
+  {id:28,name:'Air Purifier',category:'Home Appliances',price:220,stock:12,image:'https://picsum.photos/200/150?random=28'}
 
-let users = [{name:'Admin',email:'admin@myg.com',isAdmin:true}];
+];
+let users = [{name:'Admin',email:'admin@myg.com',password:'admin123',isAdmin:true}];
 let bannerImages = [
   'https://myg.in/chp/01/mob/onam-page-mob_01.jpg?888888',
   'https://myg.in/chp/01/mob/onam-page-mob_03.jpg?888888',
-  'https://myg.in/chp/01/mob/onam-page-mob_04.png',
-  'https://myg.in/chp/01/mob/onam-page-mob_24.jpg',
-  'https://myg.in/chp/01/mob/onam-page-mob_52.jpg'
+  'https://myg.in/chp/01/mob/onam-page-mob_04.png'
 ];
 let currentBannerIndex=0;
 
@@ -92,6 +110,7 @@ function renderLogin() {
     <button class="btn" onclick="login()">Login</button>
     <p>New user? <a href="#" onclick="renderRegister()">Register here</a></p>`;
 }
+
 function renderRegister() {
   app.innerHTML=`<h2>Register</h2>
     <input type="text" id="name" placeholder="Name">
@@ -100,20 +119,46 @@ function renderRegister() {
     <button class="btn" onclick="register()">Register</button>
     <p>Already have an account? <a href="#" onclick="renderLogin()">Login</a></p>`;
 }
-function login() {
-  const email=document.getElementById('email').value;
-  const password=document.getElementById('password').value;
-  if(email==='admin@myg.com'&&password==='admin123'){ currentUser={email,isAdmin:true,name:'Admin'}; renderAdminHome(); return; }
-  const user=users.find(u=>u.email===email);
-  if(user){ currentUser=user; renderUserHome(); } else { alert('User not found. Please register.'); renderLogin(); }
-}
+
 function register() {
-  const name=document.getElementById('name').value;
-  const email=document.getElementById('email').value;
-  const newUser={name,email,isAdmin:false};
-  users.push(newUser);
-  currentUser=newUser;
-  renderUserHome();
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  if(!name || !email || !password){
+    alert('Please fill all fields'); return;
+  }
+
+  const exists = users.find(u=>u.email===email);
+  if(exists){
+    alert('Email already registered. Please login.');
+    renderLogin();
+    return;
+  }
+
+  users.push({name,email,password,isAdmin:false});
+  alert('Registration successful! Please login.');
+  renderLogin();
+}
+
+function login() {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value.trim();
+
+  if(email==='admin@myg.com' && password==='admin123'){
+    currentUser = {email,password,isAdmin:true,name:'Admin'};
+    renderAdminHome();
+    return;
+  }
+
+  const user = users.find(u=>u.email===email && u.password===password);
+  if(user){
+    currentUser = user;
+    renderUserHome();
+  } else {
+    alert('Invalid email or password. Please try again or register.');
+    renderLogin();
+  }
 }
 
 // -------------------- USER HOME --------------------
@@ -126,6 +171,7 @@ function renderUserHome() {
   renderShop();
   startBannerSlider();
 }
+
 function renderCategories() {
   const categories=[...new Set(products.map(p=>p.category))];
   const container=document.getElementById('categories'); container.innerHTML='';
@@ -135,15 +181,18 @@ function renderCategories() {
     container.appendChild(div);
   });
 }
+
 function renderShopByCategory(category) {
   const container=document.getElementById('shop-products'); container.innerHTML='';
   products.filter(p=>p.category===category).forEach(p=>container.appendChild(createProductCard(p)));
 }
+
 function renderShop() {
   const query=document.getElementById('search')?.value.toLowerCase()||'';
   const container=document.getElementById('shop-products'); container.innerHTML='';
   products.filter(p=>p.name.toLowerCase().includes(query)).forEach(p=>container.appendChild(createProductCard(p)));
 }
+
 function createProductCard(product){
   const card=document.createElement('div'); card.className='card';
   card.innerHTML=`<img src="${product.image}" class="product-img">
@@ -173,8 +222,7 @@ function editProfile(){ const currentName=currentUser.name; app.innerHTML=`<h2>E
 function saveProfile(){ const newName=document.getElementById('edit-name').value.trim(); if(!newName){alert('Name cannot be empty'); return;} currentUser.name=newName; alert('Profile updated!'); renderProfile(); }
 
 // -------------------- ADMIN --------------------
-function renderAdminHome(){
-  app.innerHTML=`<h2>Admin Panel</h2>
+function renderAdminHome(){ app.innerHTML=`<h2>Admin Panel</h2>
     <h3>Add Product</h3>
     <div class="card" style="padding:10px;margin-bottom:20px;">
       <input type="text" id="prod-name" placeholder="Name" style="width:100%;margin-bottom:5px;padding:6px;">
@@ -188,6 +236,7 @@ function renderAdminHome(){
     <h3>All Users</h3><div id="admin-users"></div>`;
   renderAdminProducts(); renderAdminUsers();
 }
+
 function addProduct(){ const name=document.getElementById('prod-name').value.trim(); const cat=document.getElementById('prod-category').value.trim(); const price=parseFloat(document.getElementById('prod-price').value); const stock=parseInt(document.getElementById('prod-stock').value); const img=document.getElementById('prod-image').value.trim(); if(!name||!cat||isNaN(price)||isNaN(stock)||!img){alert('Fill all fields'); return;} const newP={id:products.length?products[products.length-1].id+1:1,name,category:cat,price,stock,image:img}; products.push(newP); alert('Product added!'); renderAdminHome(); }
 function renderAdminProducts(){ const c=document.getElementById('admin-products'); c.innerHTML=''; products.forEach(p=>{ const div=document.createElement('div'); div.className='card'; div.innerHTML=`<img src="${p.image}" class="product-img"><h4>${p.name}</h4><p>Category: ${p.category}</p><p>Price: $${p.price}</p><p>Stock: ${p.stock}</p><button class="btn" onclick="editProduct(${p.id})">Edit</button><button class="btn" style="background:#f44336;" onclick="deleteProduct(${p.id})">Delete</button>`; c.appendChild(div); }); }
 function editProduct(id){ const p=products.find(x=>x.id===id); if(!p)return; const n=prompt('Name',p.name); const c=prompt('Category',p.category); const price=parseFloat(prompt('Price',p.price)); const s=parseInt(prompt('Stock',p.stock)); const img=prompt('Image URL',p.image); if(n&&c&&!isNaN(price)&&!isNaN(s)&&img){p.name=n;p.category=c;p.price=price;p.stock=s;p.image=img; alert('Updated!'); renderAdminHome(); } else alert('Invalid input'); }
