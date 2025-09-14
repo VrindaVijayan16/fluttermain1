@@ -1,160 +1,205 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MYG Web Store</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-    header { background-color: #2e7d32; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; }
-    header h1 { margin: 0; }
-    nav button { margin-left: 10px; padding: 5px 10px; }
-    .categories { display: flex; gap: 10px; padding: 10px; overflow-x: auto; }
-    .categories button { padding: 5px 10px; }
-    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; padding: 20px; }
-    .product-card { border: 1px solid #ccc; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-    .product-card img { width: 100%; height: 150px; object-fit: contain; }
-    .product-card h3 { margin: 10px; font-size: 16px; }
-    .product-card p { margin: 0 10px 10px; font-size: 14px; }
-    .product-card button { margin: 10px; padding: 5px 10px; background-color: #2e7d32; color: white; border: none; cursor: pointer; }
-    .cart, .favorites { position: fixed; top: 70px; right: 20px; width: 300px; max-height: 80%; overflow-y: auto; background: white; border: 1px solid #ccc; padding: 10px; border-radius: 8px; display: none; }
-    .cart h2, .favorites h2 { margin-top: 0; }
-    .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; }
-    .cart-item span { margin-left: 5px; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MYG Shop</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style>
+body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f9f9f9; }
+header { background: #1976d2; color:white; padding:1rem; text-align:center; position:sticky; top:0; z-index:100; }
+header h1 { margin:0; }
+.container { padding:1rem; }
+.banner { position: relative; width:100vw; height:250px; margin-bottom:20px; overflow:hidden; border-radius:8px; }
+.banner img { width:100%; height:100%; object-fit:cover; position:absolute; top:0; left:0; opacity:0; transition:opacity 1s ease-in-out; }
+.banner img.active { opacity:1; }
+.categories { display:flex; gap:10px; overflow-x:auto; margin-bottom:20px; }
+.category-card { flex:0 0 auto; background:white; padding:10px 20px; border-radius:8px; cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,0.1); text-align:center; }
+.category-card:hover { background:#e3f2fd; }
+.products { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:15px; }
+.card { background:white; border-radius:8px; overflow:hidden; box-shadow:0 2px 5px rgba(0,0,0,0.1); text-align:center; transition:transform 0.2s; padding:10px; }
+.card:hover { transform:translateY(-5px); }
+.product-img { width:100%; height:120px; object-fit:cover; }
+.card h4 { margin:5px 0; font-size:16px; }
+.card p { margin:3px 0; font-size:14px; color:#555; }
+.btn { background:#1976d2; color:white; border:none; cursor:pointer; border-radius:4px; padding:6px 8px; margin:5px 0; display:flex; align-items:center; justify-content:center; }
+.btn:hover { opacity:0.9; }
+.btn i { font-size:18px; transition: transform 0.2s, color 0.2s; }
+.btn:hover i { transform:scale(1.2); color:#ff9800; }
+.nav { display:flex; justify-content:space-around; background:#f1f1f1; padding:0.5rem 0; position:fixed; width:100%; bottom:0; box-shadow:0 -2px 5px rgba(0,0,0,0.1); }
+.nav button { background:none; color:#1976d2; border:none; font-weight:bold; cursor:pointer; }
+#search { width:100%; padding:8px; margin:10px 0; border-radius:6px; border:1px solid #ccc; }
+</style>
 </head>
 <body>
 
-<header>
-  <h1>MYG Store</h1>
-  <div>
-    <button onclick="toggleCart()">Cart (<span id="cart-count">0</span>)</button>
-    <button onclick="toggleFavorites()">Favorites (<span id="fav-count">0</span>)</button>
-  </div>
-</header>
+<header><h1>MYG Shop</h1></header>
+<div class="container" id="app"></div>
 
-<div class="categories" id="categories">
-  <!-- Category buttons added dynamically -->
-</div>
-
-<div class="products" id="products">
-  <!-- Product cards added dynamically -->
-</div>
-
-<div class="cart" id="cart">
-  <h2>Cart</h2>
-  <div id="cart-items"></div>
-  <p>Total: $<span id="cart-total">0</span></p>
-</div>
-
-<div class="favorites" id="favorites">
-  <h2>Favorites</h2>
-  <div id="fav-items"></div>
+<div class="nav">
+  <button onclick="navigate('home')">Home</button>
+  <button onclick="navigate('cart')">Cart</button>
+  <button onclick="navigate('orders')">Orders</button>
+  <button onclick="navigate('wishlist')">Wishlist</button>
+  <button onclick="navigate('profile')">Profile</button>
 </div>
 
 <script>
-const categories = ["All", "Mobiles", "Laptops", "Appliances", "Clothing"];
+const app = document.getElementById('app');
 
-const products = [
-  {id: 'p1', name: 'iPhone 14', category: 'Mobiles', price: 999.99, image: 'https://via.placeholder.com/150'},
-  {id: 'p2', name: 'Samsung Galaxy S23', category: 'Mobiles', price: 899.99, image: 'https://via.placeholder.com/150'},
-  {id: 'p3', name: 'MacBook Pro', category: 'Laptops', price: 1999.99, image: 'https://via.placeholder.com/150'},
-];
-
+let currentUser = null;
 let cart = [];
 let favorites = [];
-let selectedCategory = "All";
+let orders = [];
+let products = [
+  {id:1,name:'Laptop',category:'Electronics',price:1200,stock:10,image:'https://sp.yimg.com/ib/th?id=OPAC.f0oA28OUsywifw474C474&o=5&pid=21.1&w=160&h=105'},
+  {id:2,name:'Kettle',category:'Kitchen Appliances',price:225,stock:5,image:'https://lzd-img-global.slatic.net/g/p/d3f3f215d0f24fc1270c9e07eb8b1330.jpg_720x720q80.jpg_.webp'},
+  {id:3,name:'Hair Straighteners',category:'Personal Care',price:35,stock:5,image:'https://www.myg.in/images/thumbnails/500/500/detailed/92/image-removebg-preview_-_2024-11-01T120432.270.png.png'},
+  {id:4,name:'Headphones',category:'Electronics',price:199,stock:8,image:'https://tse2.mm.bing.net/th/id/OIP.vh2FSVY3fjEgpvsPtVhPbwHaHa?pid=Api&P=0&h=180'},
+  {id:5,name:'Printers',category:'Electronics',price:120,stock:12,image:'https://myg.in/chp/01/mob/onam-page-mob_16.jpg'},
+  {id:7,name:'Air Fryer',category:'Kitchen Appliances',price:15,stock:20,image:'https://myg.in/chp/01/mob/onam-page-mob_28.jpg'},
+  {id:8,name:'Watch',category:'Accessories',price:250,stock:4,image:'https://www.myg.in/images/thumbnails/500/500/detailed/118/fa1-removebg-preview.png.png'},
+  {id:9,name:'Dish Washer',category:'Kitchen Appliances',price:250,stock:4,image:'https://myg.in/chp/01/mob/onam-page-mob_29.jpg'}
+];
 
+let users = [{name:'Admin',email:'admin@myg.com',isAdmin:true}];
+let bannerImages = [
+  'https://myg.in/chp/01/mob/onam-page-mob_01.jpg?888888',
+  'https://myg.in/chp/01/mob/onam-page-mob_03.jpg?888888',
+  'https://myg.in/chp/01/mob/onam-page-mob_04.png',
+  'https://myg.in/chp/01/mob/onam-page-mob_24.jpg',
+  'https://myg.in/chp/01/mob/onam-page-mob_52.jpg'
+];
+let currentBannerIndex=0;
+
+// -------------------- BANNER --------------------
+function renderBanner() {
+  const bannerDiv=document.getElementById('banner'); if(!bannerDiv) return;
+  bannerDiv.innerHTML='';
+  bannerImages.forEach((img,i)=>{
+    const image=document.createElement('img'); image.src=img;
+    if(i===currentBannerIndex) image.classList.add('active');
+    bannerDiv.appendChild(image);
+  });
+}
+function startBannerSlider() { renderBanner(); setInterval(()=>{ currentBannerIndex=(currentBannerIndex+1)%bannerImages.length; renderBanner(); },3000); }
+
+// -------------------- LOGIN / REGISTER --------------------
+function renderLogin() {
+  app.innerHTML=`<h2>Login</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button class="btn" onclick="login()">Login</button>
+    <p>New user? <a href="#" onclick="renderRegister()">Register here</a></p>`;
+}
+function renderRegister() {
+  app.innerHTML=`<h2>Register</h2>
+    <input type="text" id="name" placeholder="Name">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <button class="btn" onclick="register()">Register</button>
+    <p>Already have an account? <a href="#" onclick="renderLogin()">Login</a></p>`;
+}
+function login() {
+  const email=document.getElementById('email').value;
+  const password=document.getElementById('password').value;
+  if(email==='admin@myg.com'&&password==='admin123'){ currentUser={email,isAdmin:true,name:'Admin'}; renderAdminHome(); return; }
+  const user=users.find(u=>u.email===email);
+  if(user){ currentUser=user; renderUserHome(); } else { alert('User not found. Please register.'); renderLogin(); }
+}
+function register() {
+  const name=document.getElementById('name').value;
+  const email=document.getElementById('email').value;
+  const newUser={name,email,isAdmin:false};
+  users.push(newUser);
+  currentUser=newUser;
+  renderUserHome();
+}
+
+// -------------------- USER HOME --------------------
+function renderUserHome() {
+  app.innerHTML=`<input type="text" id="search" placeholder="Search products..." oninput="renderShop()">
+    <div class="banner" id="banner"></div>
+    <h3>Categories</h3><div class="categories" id="categories"></div>
+    <h3>Featured Products</h3><div class="products" id="shop-products"></div>`;
+  renderCategories();
+  renderShop();
+  startBannerSlider();
+}
 function renderCategories() {
-  const container = document.getElementById('categories');
-  container.innerHTML = '';
-  categories.forEach(cat => {
-    const btn = document.createElement('button');
-    btn.textContent = cat;
-    btn.style.backgroundColor = cat === selectedCategory ? '#2e7d32' : '#f0f0f0';
-    btn.style.color = cat === selectedCategory ? 'white' : 'black';
-    btn.onclick = () => { selectedCategory = cat; renderProducts(); renderCategories(); };
-    container.appendChild(btn);
-  });
-}
-
-function renderProducts() {
-  const container = document.getElementById('products');
-  container.innerHTML = '';
-  const filtered = selectedCategory === "All" ? products : products.filter(p => p.category === selectedCategory);
-  filtered.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
-      <img src="${p.image}" alt="${p.name}">
-      <h3>${p.name}</h3>
-      <p>$${p.price}</p>
-      <button onclick="addToCart('${p.id}')">Add to Cart</button>
-      <button onclick="toggleFavorite('${p.id}')">${favorites.includes(p.id) ? '❤️' : '🤍'}</button>
-    `;
-    container.appendChild(card);
-  });
-}
-
-function addToCart(id) {
-  const product = products.find(p => p.id === id);
-  const existing = cart.find(c => c.id === id);
-  if (existing) existing.quantity += 1;
-  else cart.push({...product, quantity: 1});
-  renderCart();
-}
-
-function toggleFavorite(id) {
-  if (favorites.includes(id)) favorites = favorites.filter(f => f !== id);
-  else favorites.push(id);
-  renderProducts();
-  renderFavorites();
-}
-
-function renderCart() {
-  const container = document.getElementById('cart-items');
-  const countSpan = document.getElementById('cart-count');
-  const totalSpan = document.getElementById('cart-total');
-  container.innerHTML = '';
-  let total = 0;
-  cart.forEach(item => {
-    total += item.price * item.quantity;
-    const div = document.createElement('div');
-    div.className = 'cart-item';
-    div.innerHTML = `${item.name} x${item.quantity} <span>$${(item.price*item.quantity).toFixed(2)}</span>`;
+  const categories=[...new Set(products.map(p=>p.category))];
+  const container=document.getElementById('categories'); container.innerHTML='';
+  categories.forEach(cat=>{
+    const div=document.createElement('div'); div.className='category-card'; div.innerText=cat;
+    div.onclick=()=>renderShopByCategory(cat);
     container.appendChild(div);
   });
-  countSpan.textContent = cart.length;
-  totalSpan.textContent = total.toFixed(2);
+}
+function renderShopByCategory(category) {
+  const container=document.getElementById('shop-products'); container.innerHTML='';
+  products.filter(p=>p.category===category).forEach(p=>container.appendChild(createProductCard(p)));
+}
+function renderShop() {
+  const query=document.getElementById('search')?.value.toLowerCase()||'';
+  const container=document.getElementById('shop-products'); container.innerHTML='';
+  products.filter(p=>p.name.toLowerCase().includes(query)).forEach(p=>container.appendChild(createProductCard(p)));
+}
+function createProductCard(product){
+  const card=document.createElement('div'); card.className='card';
+  card.innerHTML=`<img src="${product.image}" class="product-img">
+    <h4>${product.name}</h4>
+    <p>$${product.price}</p>
+    <p>Stock: ${product.stock}</p>
+    <div style="display:flex; justify-content:space-around; margin-top:5px;">
+      <button class="btn" style="width:40%;" onclick="addToCart(${product.id})"><i class="fas fa-cart-plus"></i></button>
+      <button class="btn" style="width:40%;" onclick="buyNow(${product.id})"><i class="fas fa-bag-shopping"></i></button>
+    </div>`;
+  return card;
 }
 
-function renderFavorites() {
-  const container = document.getElementById('fav-items');
-  const countSpan = document.getElementById('fav-count');
-  container.innerHTML = '';
-  favorites.forEach(id => {
-    const product = products.find(p => p.id === id);
-    const div = document.createElement('div');
-    div.className = 'cart-item';
-    div.textContent = product.name;
-    container.appendChild(div);
-  });
-  countSpan.textContent = favorites.length;
-}
+// -------------------- CART / BUY --------------------
+function addToCart(id){ const p=products.find(x=>x.id===id); if(!cart.includes(p)) cart.push(p); alert(p.name+' added to cart!'); renderCart(); }
+function buyNow(id){ const p=products.find(x=>x.id===id); orders.push({items:[p],total:p.price,date:new Date()}); alert(p.name+' purchased!'); renderOrders(); }
+function renderCart(){ app.innerHTML=`<h2>My Cart</h2>`; if(cart.length===0){app.innerHTML+='<p>Cart empty</p>'; return;} let total=0; cart.forEach(p=>{ total+=p.price; const div=document.createElement('div'); div.className='card'; div.innerHTML=`<img src="${p.image}" class="product-img"><h4>${p.name}</h4><p>$${p.price}</p><button class="btn" onclick="removeFromCart(${p.id})"><i class="fas fa-trash"></i></button>`; app.appendChild(div); }); app.innerHTML+=`<h3>Total: $${total}</h3>`; const btn=document.createElement('button'); btn.className='btn'; btn.innerText='Checkout'; btn.onclick=checkout; app.appendChild(btn); }
+function removeFromCart(id){ cart=cart.filter(p=>p.id!==id); renderCart(); }
+function checkout(){ if(cart.length===0){alert('Cart empty'); return;} orders.push({items:[...cart],total:cart.reduce((a,b)=>a+b.price,0),date:new Date()}); cart=[]; alert('Order placed!'); renderOrders(); }
 
-function toggleCart() {
-  const cartEl = document.getElementById('cart');
-  cartEl.style.display = cartEl.style.display === 'block' ? 'none' : 'block';
-}
+// -------------------- ORDERS --------------------
+function renderOrders(){ app.innerHTML=`<h2>My Orders</h2>`; if(orders.length===0){app.innerHTML+='<p>No orders yet</p>'; return;} orders.forEach((order,idx)=>{ const div=document.createElement('div'); div.className='card'; div.style.padding='10px'; div.innerHTML=`<h4>Order #${idx+1}</h4><p>Date: ${order.date.toLocaleString()}</p><p>Total: $${order.total}</p><strong>Items:</strong>`; order.items.forEach(p=>{div.innerHTML+=`<p>- ${p.name} - $${p.price}</p>`}); app.appendChild(div); }); }
 
-function toggleFavorites() {
-  const favEl = document.getElementById('favorites');
-  favEl.style.display = favEl.style.display === 'block' ? 'none' : 'block';
-}
+// -------------------- PROFILE --------------------
+function renderProfile(){ app.innerHTML=`<h2>My Profile</h2><div class="card" style="padding:15px; text-align:left;"><p><strong>Name:</strong> <span id="profile-name">${currentUser.name}</span></p><p><strong>Email:</strong> ${currentUser.email}</p><p><strong>Orders:</strong> ${orders.length}</p><p><strong>Cart Items:</strong> ${cart.length}</p><p><strong>Wishlist:</strong> ${favorites.length}</p><button class="btn" onclick="editProfile()">Edit Profile</button></div>`; }
+function editProfile(){ const currentName=currentUser.name; app.innerHTML=`<h2>Edit Profile</h2><div class="card" style="padding:15px; text-align:left;"><p><strong>Name:</strong></p><input type="text" id="edit-name" value="${currentName}" style="width:100%; padding:6px; margin-bottom:10px;"><button class="btn" onclick="saveProfile()">Save</button><button class="btn" style="background:#f44336; margin-left:5px;" onclick="renderProfile()">Cancel</button></div>`; }
+function saveProfile(){ const newName=document.getElementById('edit-name').value.trim(); if(!newName){alert('Name cannot be empty'); return;} currentUser.name=newName; alert('Profile updated!'); renderProfile(); }
 
-// Initial render
-renderCategories();
-renderProducts();
+// -------------------- ADMIN --------------------
+function renderAdminHome(){
+  app.innerHTML=`<h2>Admin Panel</h2>
+    <h3>Add Product</h3>
+    <div class="card" style="padding:10px;margin-bottom:20px;">
+      <input type="text" id="prod-name" placeholder="Name" style="width:100%;margin-bottom:5px;padding:6px;">
+      <input type="text" id="prod-category" placeholder="Category" style="width:100%;margin-bottom:5px;padding:6px;">
+      <input type="number" id="prod-price" placeholder="Price" style="width:100%;margin-bottom:5px;padding:6px;">
+      <input type="number" id="prod-stock" placeholder="Stock" style="width:100%;margin-bottom:5px;padding:6px;">
+      <input type="text" id="prod-image" placeholder="Image URL" style="width:100%;margin-bottom:5px;padding:6px;">
+      <button class="btn" onclick="addProduct()">Add Product</button>
+    </div>
+    <h3>All Products</h3><div id="admin-products" class="products" style="margin-bottom:20px;"></div>
+    <h3>All Users</h3><div id="admin-users"></div>`;
+  renderAdminProducts(); renderAdminUsers();
+}
+function addProduct(){ const name=document.getElementById('prod-name').value.trim(); const cat=document.getElementById('prod-category').value.trim(); const price=parseFloat(document.getElementById('prod-price').value); const stock=parseInt(document.getElementById('prod-stock').value); const img=document.getElementById('prod-image').value.trim(); if(!name||!cat||isNaN(price)||isNaN(stock)||!img){alert('Fill all fields'); return;} const newP={id:products.length?products[products.length-1].id+1:1,name,category:cat,price,stock,image:img}; products.push(newP); alert('Product added!'); renderAdminHome(); }
+function renderAdminProducts(){ const c=document.getElementById('admin-products'); c.innerHTML=''; products.forEach(p=>{ const div=document.createElement('div'); div.className='card'; div.innerHTML=`<img src="${p.image}" class="product-img"><h4>${p.name}</h4><p>Category: ${p.category}</p><p>Price: $${p.price}</p><p>Stock: ${p.stock}</p><button class="btn" onclick="editProduct(${p.id})">Edit</button><button class="btn" style="background:#f44336;" onclick="deleteProduct(${p.id})">Delete</button>`; c.appendChild(div); }); }
+function editProduct(id){ const p=products.find(x=>x.id===id); if(!p)return; const n=prompt('Name',p.name); const c=prompt('Category',p.category); const price=parseFloat(prompt('Price',p.price)); const s=parseInt(prompt('Stock',p.stock)); const img=prompt('Image URL',p.image); if(n&&c&&!isNaN(price)&&!isNaN(s)&&img){p.name=n;p.category=c;p.price=price;p.stock=s;p.image=img; alert('Updated!'); renderAdminHome(); } else alert('Invalid input'); }
+function deleteProduct(id){ if(confirm('Delete product?')){ products=products.filter(x=>x.id!==id); renderAdminHome(); } }
+function renderAdminUsers(){ const c=document.getElementById('admin-users'); c.innerHTML=''; users.forEach((u,i)=>{ const div=document.createElement('div'); div.className='card'; div.style.padding='10px'; div.style.marginBottom='10px'; div.innerHTML=`<p><strong>#${i+1} Name:</strong> ${u.name}</p><p><strong>Email:</strong> ${u.email}</p><p><strong>Admin:</strong> ${u.isAdmin?'Yes':'No'}</p>${u.isAdmin?'':`<button class="btn" style="background:#f44336;" onclick="deleteUser('${u.email}')">Delete User</button>`}`; c.appendChild(div); }); }
+function deleteUser(email){ if(confirm('Delete user?')){ users=users.filter(u=>u.email!==email); alert('User deleted!'); renderAdminUsers(); } }
+
+// -------------------- NAVIGATION --------------------
+function navigate(tab){ if(currentUser?.isAdmin){ renderAdminHome(); return; } switch(tab){ case 'home': renderUserHome(); break; case 'cart': renderCart(); break; case 'orders': renderOrders(); break; case 'wishlist': break; case 'profile': renderProfile(); break; } }
+
+// -------------------- INITIAL --------------------
+renderLogin();
 </script>
 
 </body>
